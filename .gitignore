@@ -9,3 +9,4 @@ main.exe
 *.tlog
 *.dump
 *.dmp
+perf/
