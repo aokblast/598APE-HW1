@@ -1,0 +1,11 @@
+*.obj
+*.ppm
+*.mp4
+*.png
+*.avi
+.vscode
+main.exe
+*.log
+*.tlog
+*.dump
+*.dmp
