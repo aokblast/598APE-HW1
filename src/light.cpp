@@ -105,7 +105,9 @@ void Autonoma::removeLight(LightNode* s){
    free(s);
 }
 
-void getLight(double* tColor, Autonoma* aut, Vector point, Vector norm, unsigned char flip){
+void getLight(double *tColor, Autonoma *aut, Vector point, Vector norm,
+              unsigned char flip) {
+   // TODO: vectorize
    tColor[0] = tColor[1] = tColor[2] = 0.;
    LightNode *t = aut->lightStart;
    while(t!=NULL){
@@ -122,7 +124,8 @@ void getLight(double* tColor, Autonoma* aut, Vector point, Vector norm, unsigned
          shapeIter = shapeIter->next;
       }
 
-      //TODO: Magnituted, need further searches
+      // TODO: Magnituted, need further searches
+      // TODO: Find better algorithm
       double perc = (norm.dot(ra)/(ra.mag()*norm.mag()));
 
       if(!hit){

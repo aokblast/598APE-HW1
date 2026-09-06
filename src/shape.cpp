@@ -57,7 +57,6 @@ void calcColor(unsigned char* toFill,Autonoma* c, Ray ray, unsigned int depth){
 
    while(t!=NULL){
       double time = t->data->getIntersection(ray);
-
       //TODO: pre-allocate for 2^n size and then realloc if needed, instead of malloc/free every time`
       TimeAndShape *times2 = (TimeAndShape*)malloc(sizeof(TimeAndShape)*(seen + 1));
       for (int i=0; i<seen; i++)
@@ -68,8 +67,7 @@ void calcColor(unsigned char* toFill,Autonoma* c, Ray ray, unsigned int depth){
       seen ++;
       t = t->next;
    }
-
-   //TODO： NO more sort needed, just find the min time and shape
+   // TODO： NO more sort needed, just find the min time and shape
    insertionSort(times, seen);
 
    if (seen == 0 || times[0].time == inf) {
@@ -90,7 +88,8 @@ void calcColor(unsigned char* toFill,Autonoma* c, Ray ray, unsigned int depth){
    Vector intersect = curTime*ray.vector+ray.point;
    double opacity, reflection, ambient;
    curShape->getColor(toFill, &ambient, &opacity, &reflection, c, Ray(intersect, ray.vector), depth);
-   
+
+   // TODO: Vectorize
    double lightData[3];
    getLight(lightData, c, intersect, curShape->getNormal(intersect), curShape->reversible());
    toFill[0] = (unsigned char)(toFill[0]*(ambient+lightData[0]*(1-ambient)));
