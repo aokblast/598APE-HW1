@@ -3,6 +3,7 @@
 Shape::Shape(const Vector &c, Texture* t, double ya, double pi, double ro): center(c), texture(t), yaw(ya), pitch(pi), roll(ro){
 };
 
+// TODO: Look up table
 void Shape::setAngles(double a, double b, double c){
    yaw =a; pitch = b; roll = c;
    xcos = cos(yaw);
@@ -36,6 +37,7 @@ typedef struct {
    Shape* shape;
 } TimeAndShape;
 
+//TODO: Sort, but print the quantity first
 void insertionSort(TimeAndShape *arr, int n) {
     for (int i = 1; i < n; ++i) {
         TimeAndShape key = arr[i];
@@ -52,9 +54,11 @@ void calcColor(unsigned char* toFill,Autonoma* c, Ray ray, unsigned int depth){
    ShapeNode* t = c->listStart;
    TimeAndShape *times = (TimeAndShape*)malloc(0);
    size_t seen = 0;
+
    while(t!=NULL){
       double time = t->data->getIntersection(ray);
 
+      //TODO: pre-allocate for 2^n size and then realloc if needed, instead of malloc/free every time`
       TimeAndShape *times2 = (TimeAndShape*)malloc(sizeof(TimeAndShape)*(seen + 1));
       for (int i=0; i<seen; i++)
          times2[i] = times[i];
@@ -64,7 +68,10 @@ void calcColor(unsigned char* toFill,Autonoma* c, Ray ray, unsigned int depth){
       seen ++;
       t = t->next;
    }
+
+   //TODO： NO more sort needed, just find the min time and shape
    insertionSort(times, seen);
+
    if (seen == 0 || times[0].time == inf) {
       double opacity, reflection, ambient;
       Vector temp = ray.vector.normalize();
@@ -104,6 +111,7 @@ void calcColor(unsigned char* toFill,Autonoma* c, Ray ray, unsigned int depth){
          Ray nextRay = Ray(intersect+vec*1E-4, vec);
          calcColor(col, c, nextRay, depth+1);
       
+         //TODO: padding for vectorize
          toFill[0]= (unsigned char)(toFill[0]*(1-reflection)+col[0]*(reflection));
          toFill[1]= (unsigned char)(toFill[1]*(1-reflection)+col[1]*(reflection));
          toFill[2]= (unsigned char)(toFill[2]*(1-reflection)+col[2]*(reflection));

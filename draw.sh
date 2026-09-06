@@ -37,7 +37,7 @@ fi
 make
 
 if [ "$PIANOROOM" = true ]; then
-	sudo perf record -F 99 -a -g -o ./perf/pianoroom.data -- ./main.exe -i inputs/pianoroom.ray --ppm -o output/pianoroom.ppm -H 500 -W 500
+	sudo env "PATH=$PATH" perf record -F 99 -g -o ./perf/pianoroom.data -- ./main.exe -i inputs/pianoroom.ray --ppm -o output/pianoroom.ppm -H 500 -W 500
 	sudo chmod o+r ./perf/pianoroom.data
 	perf script -i ./perf/pianoroom.data > ./perf/pianoroom.perf
 	perf/fg/stackcollapse-perf.pl ./perf/pianoroom.perf  > ./perf/pianoroom.folded
@@ -45,7 +45,7 @@ if [ "$PIANOROOM" = true ]; then
 fi
 
 if [ "$GLOBE" = true ]; then
-	sudo perf record -F 99 -a -g -o ./perf/globe.data -- ./main.exe -i inputs/globe.ray --ppm  -a inputs/globe.animate --movie -F 24 
+	sudo env "PATH=$PATH" perf record -F 99 -g -o ./perf/globe.data -- ./main.exe -i inputs/globe.ray --ppm  -a inputs/globe.animate --movie -F 24 
 	sudo chmod o+r ./perf/globe.data
 	perf script -i ./perf/globe.data > ./perf/globe.perf
 	perf/fg/stackcollapse-perf.pl ./perf/globe.perf  > ./perf/globe.folded
@@ -53,7 +53,7 @@ if [ "$GLOBE" = true ]; then
 fi
 
 if [ "$ELEPHANT" = true ]; then
-	sudo perf record -F 99 -a -g -o ./perf/elephant.data  -- ./main.exe -i inputs/elephant.ray --ppm  -a inputs/elephant.animate --movie -F 24 -W 100 -H 100 -o output/sphere.mp4
+	sudo env "PATH=$PATH" perf record -F 99 -g -o ./perf/elephant.data  -- ./main.exe -i inputs/elephant.ray --ppm  -a inputs/elephant.animate --movie -F 24 -W 100 -H 100 -o output/sphere.mp4
 	sudo chmod o+r ./perf/elephant.data
 	perf script -i ./perf/elephant.data > ./perf/elephant.perf
 	perf/fg/stackcollapse-perf.pl ./perf/elephant.perf  > ./perf/elephant.folded

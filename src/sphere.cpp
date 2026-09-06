@@ -29,6 +29,7 @@ bool Sphere::getLightIntersection(Ray ray, double* fill){
    fill[2]*=temp[2]/255.;
    return false;
 }
+
 double Sphere::getIntersection(Ray ray){
    const double A = ray.vector.mag2();
    const double B = 2*ray.vector.dot(ray.point-center);
