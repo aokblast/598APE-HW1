@@ -1,5 +1,5 @@
 FUNC := g++
-copt := -c 
+copt := -c -fno-inline-functions
 OBJ_DIR := ./bin/
 FLAGS := -O3 -lm -g -Werror
 
