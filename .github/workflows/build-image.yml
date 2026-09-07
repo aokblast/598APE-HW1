@@ -2,6 +2,7 @@ name: Docker Image CI
 
 on:
   push:
+	branches: [main]
   pull_request:
 
 env:
@@ -71,7 +72,7 @@ jobs:
       packages: read
 
     container:
-      image: ghcr.io/${{ github.repository }}:${{ github.sha }}
+      image: ${{ needs.build.outputs.image }}
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
