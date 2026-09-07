@@ -68,7 +68,7 @@ jobs:
             -v "$PWD:/workspace" \
             -w /workspace \
             ${{ needs.build.outputs.image }} \
-            bash -c 'make && performance-test.sh'
+            bash -c 'make && ./scripts/performance-test.sh'
 
       - name: Run tests on HEAD^
         run: |
@@ -77,4 +77,4 @@ jobs:
             -v "$PWD:/workspace" \
             -w /workspace \
             ${{ needs.build.outputs.image }} \
-            bash -c 'make && performance-test.sh'
+            bash -c 'make && ./scripts/performance-test.sh'
