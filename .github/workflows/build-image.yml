@@ -6,7 +6,6 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   build:
@@ -25,7 +24,7 @@ jobs:
       - name: Set image
         id: image
         run: |
-		  echo "image=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+          echo "image=ghcr.io/${GITHUB_REPOSITORY,,}:${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
 
       - name: Log in to GHCR
         uses: docker/login-action@v3
@@ -42,7 +41,6 @@ jobs:
           push: true
           tags: |
             ${{ steps.image.outputs.image }}
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
   run:
     needs: build
@@ -63,10 +61,14 @@ jobs:
         run: docker pull ${{ needs.build.outputs.image }}
 
       - name: Run image
-        run: docker run --rm ${{ needs.build.outputs.image }}	
+        run: docker run --rm ${{ needs.build.outputs.image }}
 
   test:
+    needs: build
     runs-on: ubuntu-latest
+
+    permissions:
+      packages: read
 
     container:
       image: ghcr.io/${{ github.repository }}:${{ github.sha }}
