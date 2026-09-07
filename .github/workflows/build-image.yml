@@ -1,0 +1,84 @@
+name: Docker Image CI
+
+on:
+  push:
+  pull_request:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    outputs:
+      image: ${{ steps.image.outputs.image }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set image
+        id: image
+        run: |
+          echo "image=${REGISTRY}/${IMAGE_NAME}:${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./docker/Dockerfile
+          push: true
+          tags: |
+            ${{ steps.image.outputs.image }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+
+  run:
+    needs: build
+    runs-on: ubuntu-latest
+
+    permissions:
+      packages: read
+
+    steps:
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull image
+        run: docker pull ${{ needs.build.outputs.image }}
+
+      - name: Run image
+        run: docker run --rm ${{ needs.build.outputs.image }}	
+
+  test:
+    runs-on: ubuntu-latest
+
+    container:
+      image: ghcr.io/${{ github.repository }}:${{ github.sha }}
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run tests on HEAD
+        run: make && performance-test.sh
+
+      - name: Run tests on HEAD^
+        run: git checkout HEAD^ && make && performance-test.sh
