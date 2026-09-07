@@ -2,7 +2,6 @@ name: Docker Image CI
 
 on:
   push:
-	branches: [main]
   pull_request:
 
 env:
@@ -65,7 +64,7 @@ jobs:
         run: docker run --rm ${{ needs.build.outputs.image }}
 
   test:
-    needs: build
+    needs: run
     runs-on: ubuntu-latest
 
     permissions:
