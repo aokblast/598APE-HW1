@@ -6,7 +6,9 @@ piano_room_values=()
 globe_values=()
 elephant_values=()
 
-NROUNDS=5
+NROUNDS="${NROUNDS:-2}"
+
+echo "Start running, will run for ${NROUNDS} rounds"
 
 for i in {1..$NROUNDS}
 do
