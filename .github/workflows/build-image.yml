@@ -2,7 +2,6 @@ name: Docker Image CI
 
 on:
   push:
-  pull_request:
 
 env:
   REGISTRY: ghcr.io
@@ -43,38 +42,38 @@ jobs:
             ${{ steps.image.outputs.image }}
 
   test:
-	needs: build
-	runs-on: ubuntu-latest
+    needs: build
+    runs-on: ubuntu-latest
 
-	permissions:
-	  packages: read
+    permissions:
+      packages: read
 
-	steps:
-	  - uses: actions/checkout@v4
+    steps:
+      - uses: actions/checkout@v4
 
-	  - name: Log in to GHCR
-		uses: docker/login-action@v3
-		with:
-		  registry: ${{ env.REGISTRY }}
-		  username: ${{ github.actor }}
-		  password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-	  - name: Pull test image
-		run: docker pull ${{ needs.build.outputs.image }}
+      - name: Pull test image
+        run: docker pull ${{ needs.build.outputs.image }}
 
-	  - name: Run tests on HEAD
-		run: |
-		  docker run --rm \
-			-v "$PWD:/workspace" \
-			-w /workspace \
-			${{ needs.build.outputs.image }} \
-			bash -c 'make && performance-test.sh'
+      - name: Run tests on HEAD
+        run: |
+          docker run --rm \
+            -v "$PWD:/workspace" \
+            -w /workspace \
+            ${{ needs.build.outputs.image }} \
+            bash -c 'make && performance-test.sh'
 
-	  - name: Run tests on HEAD^
-		run: |
-		  git checkout HEAD^
-		  docker run --rm \
-			-v "$PWD:/workspace" \
-			-w /workspace \
-			${{ needs.build.outputs.image }} \
-			bash -c 'make && performance-test.sh'
+      - name: Run tests on HEAD^
+        run: |
+          git checkout HEAD^
+          docker run --rm \
+            -v "$PWD:/workspace" \
+            -w /workspace \
+            ${{ needs.build.outputs.image }} \
+            bash -c 'make && performance-test.sh'
