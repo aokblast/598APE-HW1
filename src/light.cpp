@@ -109,10 +109,14 @@ void getLight(double* tColor, Autonoma* aut, Vector point, Vector norm, unsigned
    tColor[0] = tColor[1] = tColor[2] = 0.;
    LightNode *t = aut->lightStart;
    while(t!=NULL){
-      double lightColor[3];     
-      lightColor[0] = t->data->color[0]/255.;
-      lightColor[1] = t->data->color[1]/255.;
-      lightColor[2] = t->data->color[2]/255.;
+      double lightColor[3];
+      // Manually hoisting: color can alias to anything.
+      double c0 = t->data->color[0];
+      double c1 = t->data->color[1];
+      double c2 = t->data->color[2];
+      lightColor[0] = c0/255.;
+      lightColor[1] = c1/255.;
+      lightColor[2] = c2/255.;
       Vector ra = t->data->center-point;
       ShapeNode* shapeIter = aut->listStart;
       bool hit = false;
