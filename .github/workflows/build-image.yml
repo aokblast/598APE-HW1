@@ -50,7 +50,7 @@ jobs:
       packages: read
 
     steps:
-	  # Make sure we have HEAD and HEAD^
+      # Make sure we have HEAD and HEAD^
       - uses: actions/checkout@v4
         with:
           fetch-depth: 2
