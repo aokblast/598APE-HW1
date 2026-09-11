@@ -1,4 +1,5 @@
 #include "texture.h"
+#include "cassert"
 
 double interpolate(double a,double b,double x)
 {
@@ -9,6 +10,8 @@ double interpolate(double a,double b,double x)
 Texture::Texture(double am, double op, double ref):ambient(am),opacity(op), reflection(ref){}
 
 double fix(double a){
+   //TODO: IEEE 754 = > Sign(1bit) | Exp (7bit) | M (23bit)
+   //bitwise ops + transformation
    a = fmod(a, 1.);
    if(a<0) a+=1.;
    return a;
@@ -17,6 +20,7 @@ double fix(double a){
 double ground(double e){
    return (e>1.)?1.:e;
 }
+
 const char* findExtension(const char* ola){
    const char* end = ola;
    while(*end!='\0') end++;

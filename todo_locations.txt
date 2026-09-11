@@ -1,0 +1,39 @@
+My claimed tasks
+
+DONE: 1. Avoid full sorting when only the nearest intersection is needed.
+   Code location: src/shape.cpp:53
+   Related TODO: src/shape.cpp:70
+
+DONE: 2. Optimize repeated allocation/copying while collecting intersections.
+   Code location: src/shape.cpp:53
+   Related TODO: src/shape.cpp:60
+
+3. Optimize the light percentage / magnitude calculation.
+   Code location: src/light.cpp:108
+   Related TODO: src/light.cpp:127
+   Related TODO: src/light.cpp:128
+
+4. Optimize solveScalers.
+   Code location: src/vector.cpp:84
+   Related TODO: src/vector.cpp:83
+   Related TODO: src/vector.cpp:85
+   Related call sites: src/plane.cpp:91, src/plane.cpp:107, src/plane.cpp:117
+
+Other TODOs / likely separate tasks
+
+1. Investigate lookup table for angle trigonometry.
+   Code location: src/shape.cpp:7
+
+2. Investigate vectorization in getLight.
+   Code location: src/light.cpp:108
+   Related TODO: src/light.cpp:110
+   Related TODO: src/light.cpp:136
+
+3. Investigate vectorization in Plane light intersection color updates.
+   Code location: src/plane.cpp:86
+   Related TODO: src/plane.cpp:96
+
+4. Investigate vectorization in calcColor color blending.
+   Code location: src/shape.cpp:53
+   Related TODO: src/shape.cpp:92
+   Related TODO: src/shape.cpp:113
