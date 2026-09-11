@@ -1,0 +1,83 @@
+name: Docker Image CI
+
+on:
+  push:
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  build:
+    runs-on: staging
+
+    permissions:
+      contents: read
+      packages: write
+
+    outputs:
+      image: ${{ steps.image.outputs.image }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set image
+        id: image
+        run: |
+          echo "image=ghcr.io/${GITHUB_REPOSITORY,,}:${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./docker/Dockerfile
+          push: true
+          tags: |
+            ${{ steps.image.outputs.image }}
+
+  test:
+    needs: build
+    runs-on: staging
+
+    permissions:
+      contents: read
+      packages: read
+
+    steps:
+      # Make sure we have HEAD and HEAD^
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull test image
+        run: docker pull ${{ needs.build.outputs.image }}
+
+      - name: Run tests on HEAD
+        run: |
+          docker run --rm \
+            -v "$PWD:/workspace" \
+            -w /workspace \
+            ${{ needs.build.outputs.image }} \
+            bash -c 'make && ./scripts/performance-test.sh'
+
+      - name: Run tests on HEAD^
+        run: |
+          git checkout HEAD^
+          docker run --rm \
+            -v "$PWD:/workspace" \
+            -w /workspace \
+            ${{ needs.build.outputs.image }} \
+            bash -c 'make && ./scripts/performance-test.sh'
