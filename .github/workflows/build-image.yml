@@ -2,6 +2,7 @@ name: Docker Image CI
 
 on:
   push:
+  pull_request:
 
 env:
   REGISTRY: ghcr.io
@@ -48,9 +49,9 @@ jobs:
     permissions:
       contents: read
       packages: read
+      pull-requests: write
 
     steps:
-      # Make sure we have HEAD and HEAD^
       - uses: actions/checkout@v4
         with:
           fetch-depth: 2
@@ -71,8 +72,19 @@ jobs:
             -v "$PWD:/workspace" \
             -w /workspace \
             ${{ needs.build.outputs.image }} \
-            bash -c 'make && ./scripts/performance-test.sh' \
+            bash -c 'make clean || true; make && ./scripts/performance-test.sh' \
             | tee head.txt
+
+      - name: Run tests on HEAD^
+        run: |
+          git checkout HEAD^
+
+          docker run --rm \
+            -v "$PWD:/workspace" \
+            -w /workspace \
+            ${{ needs.build.outputs.image }} \
+            bash -c 'make clean || true; make && ./scripts/performance-test.sh' \
+            | tee head-parent.txt
 
       - name: Comment performance results
         if: github.event_name == 'pull_request'
