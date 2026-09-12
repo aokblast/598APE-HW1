@@ -56,45 +56,25 @@ void calcColor(unsigned char* toFill,Autonoma* c, Ray ray, unsigned int depth){
    Shape* curShape = NULL;
 
    while(t!=NULL){
-      //TODO: BOX::getIntersection
       double time = t->data->getIntersection(ray);
-      //DONE: pre-allocate for 2^n size and then realloc if needed, instead of malloc/free every time`
-      // TimeAndShape *times2 = (TimeAndShape*)malloc(sizeof(TimeAndShape)*(seen + 1));
-      // for (int i=0; i<seen; i++)
-      //    times2[i] = times[i];
-      // times2[seen] = (TimeAndShape){ time, t->data };
-      // free(times);
-      // times = times2;
-      // seen ++;
-      // t = t->next;
+
       if(time < curTime){
          curTime = time;
          curShape = t->data;
       }
       t = t->next;
    }
-   // DONE： NO more sort needed, just find the min time and shape
-   //insertionSort(times, seen);
 
-   //if (seen == 0 || times[0].time == inf) {
    if ( curShape == NULL || curTime == inf){
       double opacity, reflection, ambient;
-      //REVIEW: mag() in normalize(): NO
       Vector temp = ray.vector.normalize();
       const double x = temp.x;
       const double z = temp.z;
       const double me = (temp.y<0)?-temp.y:temp.y;
       const double angle = atan2(z, x);
-      //REVIEW: to check image::geColor() for potential optimization: NO
       c->skybox->getColor(toFill, &ambient, &opacity, &reflection, fix(angle/M_TWO_PI),fix(me));
       return;
    }
-
-   //current nearest shape and time
-   // double curTime = times[0].time;
-   // Shape* curShape = times[0].shape;
-   // free(times);
-
 
    Vector intersect = curTime*ray.vector+ray.point;
    double opacity, reflection, ambient;
@@ -102,7 +82,6 @@ void calcColor(unsigned char* toFill,Autonoma* c, Ray ray, unsigned int depth){
    
    double lightData[3];
 
-   // TODO: check the getNormal()
    getLight(lightData, c, intersect, curShape->getNormal(intersect), curShape->reversible());
    toFill[0] = (unsigned char)(toFill[0]*(ambient+lightData[0]*(1-ambient)));
    toFill[1] = (unsigned char)(toFill[1]*(ambient+lightData[1]*(1-ambient)));
