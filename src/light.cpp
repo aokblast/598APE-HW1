@@ -105,7 +105,9 @@ void Autonoma::removeLight(LightNode* s){
    free(s);
 }
 
-void getLight(double* tColor, Autonoma* aut, Vector point, Vector norm, unsigned char flip){
+void getLight(double *tColor, Autonoma *aut, Vector point, Vector norm,
+              unsigned char flip) {
+   // TODO: vectorize
    tColor[0] = tColor[1] = tColor[2] = 0.;
    LightNode *t = aut->lightStart;
    while(t!=NULL){
@@ -117,14 +119,21 @@ void getLight(double* tColor, Autonoma* aut, Vector point, Vector norm, unsigned
       ShapeNode* shapeIter = aut->listStart;
       bool hit = false;
       while(!hit && shapeIter!=NULL){
+      
         hit = shapeIter->data->getLightIntersection(Ray(point+ra*.01, ra), lightColor);
          shapeIter = shapeIter->next;
       }
+
+      // TODO: Magnituted, need further searches
+      // TODO: Find better algorithm
       double perc = (norm.dot(ra)/(ra.mag()*norm.mag()));
+
       if(!hit){
       if(flip && perc<0) perc=-perc;
         if(perc>0){
-      
+         
+
+         //TODO: Pad into 4 to get vectorization, and use vectorized operations to speed up
          tColor[0]+= perc*(lightColor[0]);
          tColor[1]+= perc*(lightColor[0]);
          tColor[2]+= perc*(lightColor[0]);
