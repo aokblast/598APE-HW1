@@ -83,7 +83,7 @@ void calcColor(unsigned char* toFill,Autonoma* c, Ray ray, unsigned int depth){
    toFill[0] = (unsigned char)(toFill[0]*(ambient+lightData[0]*(1-ambient)));
    toFill[1] = (unsigned char)(toFill[1]*(ambient+lightData[1]*(1-ambient)));
    toFill[2] = (unsigned char)(toFill[2]*(ambient+lightData[2]*(1-ambient)));
-   if(depth<c->depth && (opacity<1-1e-6 || reflection>1e-6)){
+   if(depth<c->depth){
       unsigned char col[4];
       if(opacity<1-1e-6){
          Ray nextRay = Ray(intersect+ray.vector*1E-4, ray.vector);
