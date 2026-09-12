@@ -52,6 +52,7 @@ jobs:
       pull-requests: write
 
     steps:
+      # Make sure we have HEAD and HEAD^
       - uses: actions/checkout@v4
         with:
           fetch-depth: 2
@@ -78,7 +79,6 @@ jobs:
       - name: Run tests on HEAD^
         run: |
           git checkout HEAD^
-
           docker run --rm \
             -v "$PWD:/workspace" \
             -w /workspace \
