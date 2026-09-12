@@ -1,5 +1,4 @@
 #include "texture.h"
-#include "cassert"
 
 double interpolate(double a,double b,double x)
 {
@@ -18,7 +17,6 @@ double fix(double a){
 double ground(double e){
    return (e>1.)?1.:e;
 }
-
 const char* findExtension(const char* ola){
    const char* end = ola;
    while(*end!='\0') end++;

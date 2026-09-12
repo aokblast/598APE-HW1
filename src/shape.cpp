@@ -50,8 +50,6 @@ void insertionSort(TimeAndShape *arr, int n) {
 
 void calcColor(unsigned char* toFill,Autonoma* c, Ray ray, unsigned int depth){
    ShapeNode* t = c->listStart;
-   //TimeAndShape *times = (TimeAndShape*)malloc(0);
-   //size_t seen = 0;
    double curTime = inf;
    Shape* curShape = NULL;
 
@@ -81,12 +79,10 @@ void calcColor(unsigned char* toFill,Autonoma* c, Ray ray, unsigned int depth){
    curShape->getColor(toFill, &ambient, &opacity, &reflection, c, Ray(intersect, ray.vector), depth);
    
    double lightData[3];
-
    getLight(lightData, c, intersect, curShape->getNormal(intersect), curShape->reversible());
    toFill[0] = (unsigned char)(toFill[0]*(ambient+lightData[0]*(1-ambient)));
    toFill[1] = (unsigned char)(toFill[1]*(ambient+lightData[1]*(1-ambient)));
    toFill[2] = (unsigned char)(toFill[2]*(ambient+lightData[2]*(1-ambient)));
-   
    if(depth<c->depth && (opacity<1-1e-6 || reflection>1e-6)){
       unsigned char col[4];
       if(opacity<1-1e-6){
