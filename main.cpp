@@ -392,17 +392,11 @@ void setFrame(const char* animateFile, Autonoma* MAIN_DATA, int frame, int frame
                exit(1);
             }
          } else if (streq(object_type, "object")) {
-            ShapeNode* node = MAIN_DATA->listStart;
-            for (int i=0; i<obj_num; i++) {
-               if (node == MAIN_DATA->listEnd) {
-                  printf("Could not find object number %d\n", obj_num);
-                  exit(1);
-               }
-               if (i == obj_num)
-                  break;
-               node = node->next;
-            }
-            Shape* shape = node->data;
+           if (MAIN_DATA->shapes.size() <= obj_num) {
+             printf("Could not find object number %d\n", obj_num);
+             exit(1);
+           }
+		   Shape* shape = MAIN_DATA->shapes[obj_num].get();
 
             if (streq(field_type, "yaw")) {
                shape->setYaw(result);
