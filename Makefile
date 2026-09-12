@@ -1,4 +1,4 @@
-FUNC := g++
+FUNC := clang++
 copt := -c -fno-inline-functions
 OBJ_DIR := ./bin/
 FLAGS := -lm -g -Werror

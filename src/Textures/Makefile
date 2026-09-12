@@ -1,4 +1,4 @@
-FUNC := g++
+FUNC := clang++
 copt := -c 
 output :=-o 
 FLAGS := -O3 -g -Werror
