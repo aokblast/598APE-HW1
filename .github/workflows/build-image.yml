@@ -71,13 +71,43 @@ jobs:
             -v "$PWD:/workspace" \
             -w /workspace \
             ${{ needs.build.outputs.image }} \
-            bash -c 'make && ./scripts/performance-test.sh'
+            bash -c 'make && ./scripts/performance-test.sh' \
+			| tee head.txt
 
-      - name: Run tests on HEAD^
-        run: |
-          git checkout HEAD^
-          docker run --rm \
-            -v "$PWD:/workspace" \
-            -w /workspace \
-            ${{ needs.build.outputs.image }} \
-            bash -c 'make && ./scripts/performance-test.sh'
+     - name: Comment performance results
+       if: github.event_name == 'pull_request'
+       env:
+         GH_TOKEN: ${{ github.token }}
+       run: |
+         python3 <<'PY' > comment.md
+         import re
+
+         def parse(filename):
+             text = open(filename).read()
+             return dict(
+                 (name, float(value))
+                 for name, value in re.findall(
+                     r'(PianoRoom|Globe|Elephant) Runtime:\s*([\d.]+)',
+                     text
+                 )
+             )
+
+         head = parse("head.txt")
+         parent = parse("head-parent.txt")
+
+         print("## Performance comparison\n")
+         print("| Benchmark | HEAD^ | HEAD | Speedup |")
+         print("|---|---:|---:|---:|")
+
+         for name in head:
+             speedup = parent[name] / head[name]
+             print(
+                 f"| {name} | "
+                 f"{parent[name]:.3f} ms | "
+                 f"{head[name]:.3f} ms | "
+                 f"**{speedup:.2f}×** |"
+             )
+         PY
+
+         gh pr comment "${{ github.event.pull_request.number }}" \
+           --body-file comment.md
