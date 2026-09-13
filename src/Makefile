@@ -1,4 +1,4 @@
-FUNC := g++
+FUNC := clang++
 output := -o 
 copt := -c 
 SRC_DIR := ./
