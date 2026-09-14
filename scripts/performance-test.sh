@@ -6,15 +6,18 @@ piano_room_values=()
 globe_values=()
 elephant_values=()
 
-NROUNDS="${NROUNDS:-2}"
+NROUNDS="${NROUNDS:-3}"
+
+tmp=$(mktemp)
 
 echo "Start running, will run for ${NROUNDS} rounds"
 
-for i in {1..$NROUNDS}
+for ((i=0; i<NROUNDS; i++))
 do
 
+echo "Round $i"
+
 echo "Running on Pianoroom:"
-tmp=$(mktemp)
 ./main.exe -i inputs/pianoroom.ray --ppm -o output/pianoroom.ppm -H 500 -W 500 >& $tmp
 time=$(cat $tmp | sed -n 's/.*Total time to create images=\([0-9.]*\) seconds.*/\1/p')
 echo $time
