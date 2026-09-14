@@ -48,18 +48,18 @@ void getLight(double* tColor, Autonoma* aut, Vector point, Vector norm, unsigned
 		 if (hit)
 			 break;                   
       }
-      double perc = (norm.dot(ra)/(ra.mag()*norm.mag()));
       if(!hit){
-      if(flip && perc<0) perc=-perc;
-        if(perc>0){
-      
-         tColor[0]+= perc*(lightColor[0]);
-         tColor[1]+= perc*(lightColor[0]);
-         tColor[2]+= perc*(lightColor[0]);
-         if(tColor[0]>1.) tColor[0] = 1.;
-         if(tColor[1]>1.) tColor[1] = 1.;
-         if(tColor[2]>1.) tColor[2] = 1.;
-        }
+         double perc_dot = norm.dot(ra);
+         if(flip && perc_dot<0) perc_dot=-perc_dot;
+         if(perc_dot>0){
+            double perc = perc_dot/(ra.mag());
+            tColor[0]+= perc*(lightColor[0]);
+            tColor[1]+= perc*(lightColor[0]);
+            tColor[2]+= perc*(lightColor[0]);
+            if(tColor[0]>1.) tColor[0] = 1.;
+            if(tColor[1]>1.) tColor[1] = 1.;
+            if(tColor[2]>1.) tColor[2] = 1.;
+         }
       }
    }
 }
