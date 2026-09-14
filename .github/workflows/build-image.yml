@@ -1,7 +1,6 @@
 name: Docker Image CI
 
 on:
-  push:
   pull_request:
 
 env:
@@ -41,6 +40,12 @@ jobs:
           push: true
           tags: |
             ${{ steps.image.outputs.image }}
+
+      - name: Clean up old tagged images
+        if: always()
+        run: |
+          docker image prune -a --filter "until=24h" -f
+          docker builder prune -a --filter "until=24h" -f
 
   test:
     needs: build
@@ -87,7 +92,6 @@ jobs:
             | tee head-parent.txt
 
       - name: Comment performance results
-        if: github.event_name == 'pull_request'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
