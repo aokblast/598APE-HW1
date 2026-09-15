@@ -120,3 +120,7 @@ Vector Plane::getNormal(Vector point){
       return ret;
    }
 }
+
+AABB Plane::buildAABB(){
+   return {{-inf, -inf, -inf}, {inf, inf, inf}};
+}

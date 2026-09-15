@@ -20,6 +20,7 @@ class Shape{
    virtual void setYaw(double d) = 0;
    virtual void setPitch(double d) = 0;
    virtual void setRoll(double d) = 0;
+   virtual AABB buildAABB() = 0;
    virtual ~Shape() = default;
 };
 

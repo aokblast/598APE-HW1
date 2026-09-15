@@ -16,5 +16,6 @@ public:
   void setYaw(double a);
   void setPitch(double b);
   void setRoll(double c);
+  AABB buildAABB();
 };
 #endif

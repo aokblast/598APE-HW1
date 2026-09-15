@@ -29,3 +29,11 @@ bool Box::getLightIntersection(Ray ray, double* fill){
    fill[2]*=temp[2]/255.;
    return false;
 }
+
+AABB Box::buildAABB(){
+   const double ex = (fabs(right.x)*textureX + fabs(up.x)*textureY)/2;
+   const double ey = (fabs(right.y)*textureX + fabs(up.y)*textureY)/2;
+   const double ez = (fabs(right.z)*textureX + fabs(up.z)*textureY)/2;
+   return {{center.x-ex, center.y-ey, center.z-ez},
+           {center.x+ex, center.y+ey, center.z+ez}};
+}

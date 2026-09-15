@@ -33,6 +33,7 @@ Triangle::Triangle(Vector c, Vector b, Vector a, Texture* t):Plane(Vector(0,0,0)
    thirdX = np.x;
    
    d = -vect.dot(center);
+
 }
 
 double Triangle::getIntersection(Ray ray){
@@ -63,4 +64,14 @@ bool Triangle::getLightIntersection(Ray ray, double* fill){
    fill[1]*=temp[1]/255.;
    fill[2]*=temp[2]/255.;
    return false;
+}
+
+AABB Triangle::buildAABB(){
+   const Vector a = center;
+   const Vector b = center + right*textureX;
+   const Vector c = center + right*thirdX + up*textureY;
+   return {{std::min({a.x, b.x, c.x}), std::min({a.y, b.y, c.y}),
+            std::min({a.z, b.z, c.z})},
+           {std::max({a.x, b.x, c.x}), std::max({a.y, b.y, c.y}),
+            std::max({a.z, b.z, c.z})}};
 }
