@@ -29,7 +29,7 @@ struct AABB {
       maxbounds[i] = std::max(maxbounds[i], rhs.maxbounds[i]);
     }
   }
-  inline double calcSurfaceAreea() const {
+  inline double calcSurfaceArea() const {
     double a = maxbounds[0] - minbounds[0], b = maxbounds[1] - minbounds[1],
            c = maxbounds[2] - minbounds[2];
     return 2 * (a * b + b * c + a * c);
@@ -43,8 +43,8 @@ struct AABB {
   }
   AABB() {
     for (int i = 0; i < 3; ++i) {
-      minbounds[i] = std::numeric_limits<double>().max();
-      maxbounds[i] = std::numeric_limits<double>().lowest();
+      minbounds[i] = std::numeric_limits<double>::max();
+      maxbounds[i] = std::numeric_limits<double>::lowest();
     }
   }
   AABB(const std::array<double, 3> &mn, const std::array<double, 3> &mx)

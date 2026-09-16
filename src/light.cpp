@@ -95,8 +95,8 @@ class BVHTree {
         if (lcnt == 0 || rcnt == 0)
           continue;
         // nA * pA + nB * pB
-        double cost = lsurface.calcSurfaceAreea() * lcnt +
-                      rsurface.calcSurfaceAreea() * rcnt;
+        double cost = lsurface.calcSurfaceArea() * lcnt +
+                      rsurface.calcSurfaceArea() * rcnt;
         if (cost < minCost) {
           minCost = cost;
           minIdx = i;
@@ -143,8 +143,8 @@ class BVHTree {
 
   static bool aabbIntersect(const AABB &aabb, const Ray &ray, double &tmin) {
     Vector inv_dir = 1.0 / ray.vector;
-    double mn = std::numeric_limits<double>().lowest();
-    double mx = std::numeric_limits<double>().max();
+    double mn = std::numeric_limits<double>::lowest();
+    double mx = std::numeric_limits<double>::max();
 
     double ta = (aabb.minbounds[0] - ray.point.x) * inv_dir.x;
     double tb = (aabb.maxbounds[0] - ray.point.x) * inv_dir.x;
