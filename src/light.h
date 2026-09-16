@@ -23,7 +23,7 @@ class BVHTree;
 struct AABB {
   std::array<double, 3> minbounds;
   std::array<double, 3> maxbounds;
-  inline void Union(const struct AABB &rhs) {
+  inline void Union(const AABB &rhs) {
     for (int i = 0; i < 3; ++i) {
       minbounds[i] = std::min(minbounds[i], rhs.minbounds[i]);
       maxbounds[i] = std::max(maxbounds[i], rhs.maxbounds[i]);

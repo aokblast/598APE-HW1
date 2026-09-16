@@ -33,7 +33,6 @@ Triangle::Triangle(Vector c, Vector b, Vector a, Texture* t):Plane(Vector(0,0,0)
    thirdX = np.x;
    
    d = -vect.dot(center);
-
 }
 
 double Triangle::getIntersection(Ray ray){

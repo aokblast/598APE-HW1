@@ -18,25 +18,22 @@ class BVHTree {
   constexpr static int LEAF_SIZE = 4;
   struct BVHTreeNode {
     AABB aabb;
-    BVHTreeNode *left, *right;
+    int left, right;
     bool is_leaf;
     std::vector<Shape *> leafs;
-    BVHTreeNode(AABB aabb, BVHTreeNode *left, BVHTreeNode *right)
+    BVHTreeNode(AABB aabb, int left, int right)
         : aabb(aabb), left(left), right(right), is_leaf(false) {};
     BVHTreeNode(AABB aabb, std::vector<Shape *> shapes)
-        : aabb(aabb), leafs(std::move(shapes)), left(nullptr), right(nullptr),
+        : aabb(aabb), leafs(std::move(shapes)), left(-1), right(-1),
           is_leaf(true) {};
-    ~BVHTreeNode() {
-      delete left;
-      delete right;
-    }
+    BVHTreeNode() : left(-1), right(-1), is_leaf(false) {}
   };
-  BVHTreeNode *root = nullptr;
+  std::vector<BVHTreeNode> root;
   std::vector<Shape *> unbounded;
 
-  static inline BVHTreeNode *
+  static inline void
   buildLeaf(std::vector<std::unique_ptr<Shape>> &shapes, const std::vector<AABB> &aabbs,
-            const std::vector<int> &iotas) {
+            const std::vector<int> &iotas, BVHTreeNode *cur) {
 	AABB aabb;
 	std::vector<Shape *> leafShapes;
 	leafShapes.reserve(iotas.size());
@@ -44,12 +41,17 @@ class BVHTree {
 		aabb.Union(aabbs[idx]);
 		leafShapes.push_back(shapes[idx].get());
 	}
-	return new BVHTreeNode(aabb, std::move(leafShapes));
+	*cur = BVHTreeNode(aabb, std::move(leafShapes));
   }
-  static BVHTreeNode *
-  buildImpl(std::vector<std::unique_ptr<Shape>> &shapes, const std::vector<AABB> &aabbs, const std::vector<int> &iotas) {
-    if (iotas.size() <= LEAF_SIZE)
-      return buildLeaf(shapes, aabbs, iotas);
+
+  static int
+  buildImpl(std::vector<std::unique_ptr<Shape>> &shapes, const std::vector<AABB> &aabbs, const std::vector<int> &iotas, std::vector<BVHTreeNode> &root) {
+	if (iotas.size() <= LEAF_SIZE) {
+		int cur_idx = root.size();
+		root.push_back({});
+		buildLeaf(shapes, aabbs, iotas, &root[cur_idx]);
+		return cur_idx;
+	}            
     AABB aabb = aabbs[iotas[0]];
     for (size_t i = 1; i < iotas.size(); ++i)
       aabb.Union(aabbs[iotas[i]]);
@@ -118,12 +120,14 @@ class BVHTree {
       liota.assign(iotas.begin(), iotas.begin() + mid);
       riota.assign(iotas.begin() + mid, iotas.end());
     }
-
-    BVHTreeNode *ltree = buildImpl(shapes, aabbs, liota);
-    BVHTreeNode *rtree = buildImpl(shapes, aabbs, riota);
-    aabb = ltree->aabb;
-    aabb.Union(rtree->aabb);
-    return new BVHTreeNode(aabb, ltree, rtree);
+	int cidx = root.size();
+	root.push_back({});
+    int lidx = buildImpl(shapes, aabbs, liota, root);
+    int ridx = buildImpl(shapes, aabbs, riota, root);
+    aabb = root[lidx].aabb;
+    aabb.Union(root[ridx].aabb);
+	root[cidx] = BVHTreeNode(aabb, lidx, ridx);
+    return cidx;
   }
 
   static void intersectLeaf(const BVHTreeNode *root, const Ray &ray,
@@ -164,20 +168,21 @@ class BVHTree {
     return false;
   }
 
-  static void intersectImpl(BVHTreeNode *root, const Ray &ray, double &tres,
-                            Shape *&shape) {
+  static void intersectImpl(std::vector<BVHTreeNode> &root, const Ray &ray,
+                            double &tres, Shape *&shape) {
     // {node, tmin}
-    std::vector<std::pair<BVHTreeNode *, double>> stack;
+    std::vector<std::pair<int, double>> stack;
     double tclose = inf;
     double tmin;
 
     shape = NULL;
-    if (aabbIntersect(root->aabb, ray, tmin))
-      stack.push_back({root, tmin});
+    if (aabbIntersect(root[0].aabb, ray, tmin))
+      stack.push_back({0, tmin});
 
     while (stack.size()) {
-      auto [cur, ctmin] = stack.back();
+      auto [cidx, ctmin] = stack.back();
       stack.pop_back();
+	  BVHTreeNode *cur = &root[cidx];
 
       if (ctmin > tclose)
         continue;
@@ -186,9 +191,9 @@ class BVHTree {
         continue;
       }
       double ltmin, rtmin;
-      bool lhit = aabbIntersect(cur->left->aabb, ray, ltmin) && ltmin <= tclose;
+      bool lhit = aabbIntersect(root[cur->left].aabb, ray, ltmin) && ltmin <= tclose;
       bool rhit =
-          aabbIntersect(cur->right->aabb, ray, rtmin) && rtmin <= tclose;
+          aabbIntersect(root[cur->right].aabb, ray, rtmin) && rtmin <= tclose;
       if (lhit && rhit) {
         if (ltmin < rtmin) {
           stack.push_back({cur->right, rtmin});
@@ -206,7 +211,6 @@ class BVHTree {
   }
 
 public:
-  ~BVHTree() { delete root; }
   const std::vector<Shape *> &getUnbounded() const { return unbounded; }
 
   void buildFromShapes(std::vector<std::unique_ptr<Shape>> &shapes) {
@@ -225,14 +229,19 @@ public:
         unbounded.push_back(shapes[i].get());
     }
 
-    delete root;
-    root = iotas.empty() ? nullptr : buildImpl(shapes, aabbs, iotas);
+	root.clear();
+	if (iotas.size()) {
+		root.reserve(2 * iotas.size() - 1);
+		buildImpl(shapes, aabbs, iotas, root);
+		root.shrink_to_fit();
+	}          
+
   }
 
   double intersect(const Ray lightRay, Shape *&shape) {
     double tclosest = inf;
     shape = NULL;
-    if (root != nullptr)
+    if (root.size())
       intersectImpl(root, lightRay, tclosest, shape);
     // Unbounded shapes are not in the tree, so they must be tested linearly.
     for (Shape *cshape : unbounded) {
