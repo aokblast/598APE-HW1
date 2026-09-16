@@ -65,6 +65,7 @@ public:
    void addShape(Shape* s);
    void addLight(Light* s);
    void buildBVHTree();
+   void intersect(const Ray ray, Shape *&shape, double &time);
    ~Autonoma();
 };
 

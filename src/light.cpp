@@ -6,6 +6,7 @@
 #include <limits>
 #include <memory>
 #include <utility>
+#include <vector>
 
 /*
  * XXXaokblast: The tree may need to be rebuilt if textureX, textureY, or yaw,
@@ -125,6 +126,85 @@ class BVHTree {
     return new BVHTreeNode(aabb, ltree, rtree);
   }
 
+  static void intersectLeaf(const BVHTreeNode *root, const Ray &ray,
+                            Shape *&shape, double &tmin) {
+    for (auto cshape : root->leafs) {
+      double ctime = cshape->getIntersection(ray);
+      if (ctime < tmin) {
+        tmin = ctime;
+        shape = cshape;
+      }
+    }
+  }
+
+  static bool aabbIntersect(const AABB &aabb, const Ray &ray, double &tmin) {
+    Vector inv_dir = 1.0 / ray.vector;
+    double mn = std::numeric_limits<double>().lowest();
+    double mx = std::numeric_limits<double>().max();
+
+    double ta = (aabb.minbounds[0] - ray.point.x) * inv_dir.x;
+    double tb = (aabb.maxbounds[0] - ray.point.x) * inv_dir.x;
+    mn = std::max(mn, std::min(ta, tb));
+    mx = std::min(mx, std::max(ta, tb));
+
+    ta = (aabb.minbounds[1] - ray.point.y) * inv_dir.y;
+    tb = (aabb.maxbounds[1] - ray.point.y) * inv_dir.y;
+    mn = std::max(mn, std::min(ta, tb));
+    mx = std::min(mx, std::max(ta, tb));
+
+    ta = (aabb.minbounds[2] - ray.point.z) * inv_dir.z;
+    tb = (aabb.maxbounds[2] - ray.point.z) * inv_dir.z;
+    mn = std::max(mn, std::min(ta, tb));
+    mx = std::min(mx, std::max(ta, tb));
+
+    if (mx >= std::max(mn, 0.0)) {
+      tmin = mn;
+      return true;
+    }
+    return false;
+  }
+
+  static void intersectImpl(BVHTreeNode *root, const Ray &ray, double &tres,
+                            Shape *&shape) {
+    // {node, tmin}
+    std::vector<std::pair<BVHTreeNode *, double>> stack;
+    double tclose = inf;
+    double tmin;
+
+    shape = NULL;
+    if (aabbIntersect(root->aabb, ray, tmin))
+      stack.push_back({root, tmin});
+
+    while (stack.size()) {
+      auto [cur, ctmin] = stack.back();
+      stack.pop_back();
+
+      if (ctmin > tclose)
+        continue;
+      if (cur->is_leaf) {
+        intersectLeaf(cur, ray, shape, tclose);
+        continue;
+      }
+      double ltmin, rtmin;
+      bool lhit = aabbIntersect(cur->left->aabb, ray, ltmin) && ltmin <= tclose;
+      bool rhit =
+          aabbIntersect(cur->right->aabb, ray, rtmin) && rtmin <= tclose;
+      if (lhit && rhit) {
+        if (ltmin < rtmin) {
+          stack.push_back({cur->right, rtmin});
+          stack.push_back({cur->left, ltmin});
+        } else {
+          stack.push_back({cur->left, ltmin});
+          stack.push_back({cur->right, rtmin});
+        }
+      } else if (lhit)
+        stack.push_back({cur->left, ltmin});
+      else if (rhit)
+        stack.push_back({cur->right, rtmin});
+    }
+    tres = tclose;
+  }
+
 public:
   ~BVHTree() { delete root; }
   const std::vector<Shape *> &getUnbounded() const { return unbounded; }
@@ -147,6 +227,22 @@ public:
 
     delete root;
     root = iotas.empty() ? nullptr : buildImpl(shapes, aabbs, iotas);
+  }
+
+  double intersect(const Ray lightRay, Shape *&shape) {
+    double tclosest = inf;
+    shape = NULL;
+    if (root != nullptr)
+      intersectImpl(root, lightRay, tclosest, shape);
+    // Unbounded shapes are not in the tree, so they must be tested linearly.
+    for (Shape *cshape : unbounded) {
+      double ctime = cshape->getIntersection(lightRay);
+      if (ctime < tclosest) {
+        tclosest = ctime;
+        shape = cshape;
+      }
+    }
+    return tclosest;
   }
 };
       
@@ -184,6 +280,10 @@ void Autonoma::buildBVHTree() {
   if (!bvh)
     bvh = new BVHTree();
   bvh->buildFromShapes(shapes);
+}
+
+void Autonoma::intersect(const Ray ray, Shape *&shape, double &time) {
+  time = bvh->intersect(ray, shape);
 }
 
 Autonoma::~Autonoma() { delete bvh; };
