@@ -15,4 +15,3 @@ Vector solveScalers(Vector v1, Vector v2, Vector v3, Vector C){
    return Vector(a/denom, b/denom, c/denom);
 }
 
-Ray::Ray(const Vector& po, const Vector& ve): point(po), vector(ve){}

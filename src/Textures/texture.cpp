@@ -8,12 +8,6 @@ double interpolate(double a,double b,double x)
 
 Texture::Texture(double am, double op, double ref):ambient(am),opacity(op), reflection(ref){}
 
-double fix(double a){
-   a = a - (long long)a;
-   if(a<0) a+=1.;
-   return a;
-}
-
 double ground(double e){
    return (e>1.)?1.:e;
 }
