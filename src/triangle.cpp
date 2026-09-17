@@ -19,19 +19,16 @@ Triangle::Triangle(Vector c, Vector b, Vector a, Texture* t):Plane(Vector(0,0,0)
    else if (zsin>1.)zsin=1.;
    if(zcos<-1.)zcos = -1;
    else if (zcos>1.)zcos=1.;
-   roll = asin(zsin);
+   roll = atan2(zsin, zcos);
 
    ycos = vect.z/xcos;
    if(ycos<-1.)ycos = -1;
    else if (ycos>1.)ycos=1.;
-   pitch = acos(ycos);
-   ysin = sqrt(1-ycos*ycos);
+   up = vect.cross(right);
 
-   up.x = -xsin*ysin*zcos+ycos*zsin;
-   up.y = ycos*zcos+xsin*ysin*zsin;
-   up.z = -xcos*ysin;
-   Vector temp = vect.cross(right);
    Vector np = solveScalers(right, up, vect, a-c);
+   ysin = -up.z/xcos;
+   pitch = atan2(ysin, ycos);
    textureY = np.y;
    thirdX = np.x;
    
