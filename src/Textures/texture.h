@@ -23,7 +23,11 @@ const char* findExtension(const char* s);
 
 double ground(double e);
 
-double fix(double a);
+inline double fix(double a){
+   a = a - (long long)a;
+   if(a<0) a+=1.;
+   return a;
+}
 
 char lowerCase(char c);
 
