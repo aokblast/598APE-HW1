@@ -5,7 +5,9 @@
 #include <utility>
       
 Light::Light(const Vector & cente, unsigned char* colo) : center(cente){
-   color = colo;
+   color[0] = colo[0] / 255.;
+   color[1] = colo[1] / 255.;
+   color[2] = colo[2] / 255.;
 }
 
 unsigned char* Light::getColor(unsigned char a, unsigned char b, unsigned char c){
@@ -38,9 +40,9 @@ void getLight(double* tColor, Autonoma* aut, Vector point, Vector norm, unsigned
    tColor[0] = tColor[1] = tColor[2] = 0.;
    for (const auto &t : aut->lights) {
       double lightColor[3];     
-      lightColor[0] = t->color[0]/255.;
-      lightColor[1] = t->color[1]/255.;
-      lightColor[2] = t->color[2]/255.;
+      lightColor[0] = t->color[0];
+      lightColor[1] = t->color[1];
+      lightColor[2] = t->color[2];
       Vector ra = t->center-point;
       bool hit = false;
       Ray lightRay = Ray(point+ra*.01, ra);
