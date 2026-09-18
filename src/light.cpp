@@ -141,6 +141,16 @@ class BVHTree {
     }
   }
 
+  static bool intersectLightLeaf(const BVHTreeNode *root, const Ray &ray,
+                            double *lightColor) {
+    for (auto cshape : root->leafs) {
+      bool hit = cshape->getLightIntersection(ray, lightColor);
+      if (hit)
+        return true;
+    }
+    return false;
+  }
+
   static bool aabbIntersect(const AABB &aabb, const Ray &ray, double &tmin) {
     Vector inv_dir = 1.0 / ray.vector;
     double mn = std::numeric_limits<double>::lowest();
@@ -166,6 +176,13 @@ class BVHTree {
       return true;
     }
     return false;
+  }
+
+  static bool aabbLightIntersect(const AABB &aabb, const Ray &ray) {
+    double tmin;
+    if (aabbIntersect(aabb, ray, tmin) && tmin <= 1.0)
+      return true;
+    return false; 
   }
 
   static void intersectImpl(std::vector<BVHTreeNode> &root, const Ray &ray,
@@ -208,6 +225,30 @@ class BVHTree {
         stack.push_back({cur->right, rtmin});
     }
     tres = tclose;
+  }
+
+  static bool intersectLightImpl(std::vector<BVHTreeNode> &root, const Ray &ray,
+                            double *lightColor) {
+    std::vector<int> stack;
+    if(aabbLightIntersect(root[0].aabb, ray))
+      stack.push_back(0);
+
+    while (stack.size()) {
+      auto cidx = stack.back();
+      stack.pop_back();
+      BVHTreeNode *cur = &root[cidx];
+
+      if(cur->is_leaf) {
+        if(intersectLightLeaf(cur, ray, lightColor))
+          return true;
+        continue;
+      }
+      if(aabbLightIntersect(root[cur->left].aabb, ray))
+        stack.push_back(cur->left);
+      if(aabbLightIntersect(root[cur->right].aabb, ray))
+        stack.push_back(cur->right);
+  }
+  return false;
   }
 
 public:
@@ -253,6 +294,20 @@ public:
     }
     return tclosest;
   }
+
+  bool intersectLight(const Ray lightRay, double *lightColor) {
+    if(root.size())
+      if(intersectLightImpl(root, lightRay, lightColor))
+        return true;
+    // Unbounded shapes are not in the tree, so they must be tested linearly.
+    for (Shape *cshape : unbounded) {
+      bool hit = cshape->getLightIntersection(lightRay, lightColor);
+      if (hit) {
+        return true;
+      }
+    }
+    return false;
+  }
 };
       
 Light::Light(const Vector & cente, unsigned char* colo) : center(cente){
@@ -295,6 +350,10 @@ void Autonoma::intersect(const Ray ray, Shape *&shape, double &time) {
   time = bvh->intersect(ray, shape);
 }
 
+bool Autonoma::intersectLight(const Ray lightRay, double *lightColor) {
+  return bvh->intersectLight(lightRay, lightColor);
+}
+
 Autonoma::~Autonoma() { delete bvh; };
 
 void getLight(double* tColor, Autonoma* aut, Vector point, Vector norm, unsigned char flip){
@@ -307,11 +366,7 @@ void getLight(double* tColor, Autonoma* aut, Vector point, Vector norm, unsigned
       Vector ra = t->center-point;
       bool hit = false;
       Ray lightRay = Ray(point+ra*.01, ra);
-	  for (const auto &shape : aut->shapes) {
-		 hit = shape->getLightIntersection(lightRay, lightColor);
-		 if (hit)
-			 break;                   
-      }
+      hit = aut->intersectLight(lightRay, lightColor);
       if(!hit){
          double perc_dot = norm.dot(ra);
          if(flip && perc_dot<0) perc_dot=-perc_dot;
