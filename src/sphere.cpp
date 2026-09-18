@@ -11,8 +11,6 @@ bool Sphere::getLightIntersection(Ray ray, double* fill){
    const double C = (ray.point-center).mag2()-radius*radius;
    const double descriminant = B*B-A*C;
    if(descriminant<0. || descriminant<B*((B>=0)?B:-B)) return false;
-   if(texture->opacity>1-1E-6) return true;
-   
       const double desc = sqrt(descriminant);
       const double root1 = (-B-desc)/(A);
       const double root2 = (-B+desc)/(A);
