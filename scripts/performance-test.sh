@@ -5,6 +5,7 @@ make
 piano_room_values=()
 globe_values=()
 elephant_values=()
+elephant_real_values=()
 
 NROUNDS="${NROUNDS:-3}"
 
@@ -35,6 +36,12 @@ time=$(cat $tmp | sed -n 's/.*Total time to create images=\([0-9.]*\) seconds.*/
 echo $time
 elephant_values+=($time)
 
+echo "Running on Elephant Real:"
+./main.exe -i inputs/elephant_real.ray --ppm  -a inputs/elephant.animate --movie -F 24 -W 100 -H 100 -o output/sphere.mp4  >& $tmp
+time=$(cat $tmp | sed -n 's/.*Total time to create images=\([0-9.]*\) seconds.*/\1/p')
+echo $time
+elephant_real_values+=($time)
+
 done
 
 average=$(printf "%s\n" "${piano_room_values[@]}" | awk '{sum+=$1} END {print sum/NR}')
@@ -43,3 +50,5 @@ average=$(printf "%s\n" "${globe_values[@]}" | awk '{sum+=$1} END {print sum/NR}
 echo "Globe Runtime: $average"
 average=$(printf "%s\n" "${elephant_values[@]}" | awk '{sum+=$1} END {print sum/NR}')
 echo "Elephant Runtime: $average"
+average=$(printf "%s\n" "${elephant_real_values[@]}" | awk '{sum+=$1} END {print sum/NR}')
+echo "ElephantReal Runtime: $average"
