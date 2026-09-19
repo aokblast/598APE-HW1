@@ -43,8 +43,9 @@ void getLight(double* tColor, Autonoma* aut, Vector point, Vector norm, unsigned
       lightColor[2] = t->color[2]/255.;
       Vector ra = t->center-point;
       bool hit = false;
+      Ray lightRay = Ray(point+ra*.01, ra);
 	  for (const auto &shape : aut->shapes) {
-		 hit = shape->getLightIntersection(Ray(point+ra*.01, ra), lightColor);
+		 hit = shape->getLightIntersection(lightRay, lightColor);
 		 if (hit)
 			 break;                   
       }
