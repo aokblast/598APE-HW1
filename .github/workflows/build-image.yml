@@ -103,7 +103,7 @@ jobs:
               return dict(
                   (name, float(value))
                   for name, value in re.findall(
-                      r'(PianoRoom|Globe|Elephant) Runtime:\s*([\d.]+)',
+                      r'(PianoRoom|Globe|Elephant|ElephantReal) Runtime:\s*([\d.]+)',
                       text
                   )
               )
