@@ -27,3 +27,11 @@ bool Disk::getLightIntersection(Ray ray, double* fill){
    fill[2]*=temp[2]/255.;
    return false;
 }
+
+AABB Disk::buildAABB(){
+   const double ex = sqrt(right.x*right.x*textureX*textureX + up.x*up.x*textureY*textureY);
+   const double ey = sqrt(right.y*right.y*textureX*textureX + up.y*up.y*textureY*textureY);
+   const double ez = sqrt(right.z*right.z*textureX*textureX + up.z*up.z*textureY*textureY);
+   return {{center.x-ex, center.y-ey, center.z-ez},
+           {center.x+ex, center.y+ey, center.z+ez}};
+}

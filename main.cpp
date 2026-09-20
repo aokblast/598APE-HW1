@@ -333,6 +333,7 @@ Autonoma* createInputs(const char* inputFile) {
       }
    }
 
+   MAIN_DATA->buildBVHTree();
    return MAIN_DATA;
 }
 
@@ -549,7 +550,7 @@ int main(int argc, const char** argv){
 
    gettimeofday(&end, NULL);
    printf("Total time to create images=%0.6f seconds\n", tdiff(&start, &end));
-
+   delete MAIN_DATA;
    if (frameLen > 1 && toMovie) {
       if (png) {
          snprintf(command, sizeof(command), "ffmpeg -y -r 24 -i %s.tmp.%%07d.png -vcodec ffv1 %s.tmp.avi && ffmpeg -y -i %s.tmp.avi -c:v libx264 -preset veryslow -qp 0 -r 24 %s", outFile, outFile, outFile, outFile);

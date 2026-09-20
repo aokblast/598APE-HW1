@@ -52,14 +52,7 @@ void calcColor(unsigned char* toFill,Autonoma* c, Ray ray, unsigned int depth){
    double curTime = inf;
    Shape* curShape = NULL;
 
-   for (const auto &shape : c->shapes) {
-      double time = shape->getIntersection(ray);
-
-      if(time < curTime){
-         curTime = time;
-         curShape = shape.get();
-      }
-   }
+   c->intersect(ray, curShape, curTime);
 
    if ( curShape == NULL || curTime == inf){
       double opacity, reflection, ambient;

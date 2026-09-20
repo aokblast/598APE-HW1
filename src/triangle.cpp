@@ -1,6 +1,7 @@
 #include "triangle.h"
+#include <algorithm>
 
-Triangle::Triangle(Vector c, Vector b, Vector a, Texture* t):Plane(Vector(0,0,0), t, 0., 0., 0., 0., 0.){
+Triangle::Triangle(Vector c, Vector b, Vector a, Texture* t):Plane(Vector(0,0,0), t, 0., 0., 0., 0., 0.) {
    center = c;
    Vector righta = (b-c);
    textureX = righta.mag();
@@ -63,4 +64,13 @@ bool Triangle::getLightIntersection(Ray ray, double* fill){
    fill[1]*=temp[1]/255.;
    fill[2]*=temp[2]/255.;
    return false;
+}
+
+AABB Triangle::buildAABB() {
+  Vector b = right * textureX + center;
+  Vector a = thirdX * right + textureY * up + center;
+  return {{std::min({a.x, b.x, center.x}), std::min({a.y, b.y, center.y}),
+           std::min({a.z, b.z, center.z})},
+          {std::max({a.x, b.x, center.x}), std::max({a.y, b.y, center.y}),
+           std::max({a.z, b.z, center.z})}};
 }
