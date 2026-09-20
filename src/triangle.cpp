@@ -36,34 +36,57 @@ Triangle::Triangle(Vector c, Vector b, Vector a, Texture* t):Plane(Vector(0,0,0)
    d = -vect.dot(center);
 }
 
-double Triangle::getIntersection(Ray ray){
-   double time = Plane::getIntersection(ray);
-   if(time==inf) 
-      return time;
-   Vector dist = solveScalers(right, up, vect, ray.point+ray.vector*time-center); 
-   unsigned char tmp = (thirdX - dist.x) * textureY + (thirdX-textureX) * (dist.y - textureY) < 0.0;
-   return((tmp!=(textureX * dist.y < 0.0)) || (tmp != (dist.x * textureY - thirdX * dist.y < 0.0)))?inf:time;
+double Triangle::getIntersection(Ray ray) {
+  Vector S = ray.point - center;
+  Vector E1 = right * textureX;
+  Vector E2 = right * thirdX + up * textureY;
+  Vector S1 = ray.vector.cross(E2);
+  Vector S2 = S.cross(E1);
+
+  double S1E1 = S1.dot(E1);
+  // Parallel
+  if (S1E1 == 0)
+	  return inf;
+  double t = S2.dot(E2) / S1E1;
+  double b1 = S1.dot(S) / S1E1;
+  double b2 = S2.dot(ray.vector) / S1E1;
+
+  if (t > 0 && b1 >= 0 && b2 >= 0 && (1 - b1 - b2) >= 0)
+    return t;
+  return inf;
 }
 
 bool Triangle::getLightIntersection(Ray ray, double* fill){
-   const double t = ray.vector.dot(vect);
-   const double norm = vect.dot(ray.point)+d;
-   const double r = -norm/t;
-   if(r<=0. || r>=1.) return false;
-   Vector dist = solveScalers(right, up, vect, ray.point+ray.vector*r-center);
-   
-   unsigned char tmp = (thirdX - dist.x) * textureY + (thirdX-textureX) * (dist.y - textureY) < 0.0;
-   if ((tmp!=(textureX * dist.y < 0.0)) || (tmp != (dist.x * textureY - thirdX * dist.y < 0.0))) return false;
-   
-   if(texture->opacity>1-1E-6) return true;   
-   unsigned char temp[4];
-   double amb, op, ref;
-   texture->getColor(temp, &amb, &op, &ref,fix(dist.x/textureX-.5), fix(dist.y/textureY-.5));
-   if(op>1-1E-6) return true;
-   fill[0]*=temp[0]/255.;
-   fill[1]*=temp[1]/255.;
-   fill[2]*=temp[2]/255.;
-   return false;
+  Vector S = ray.point - center;
+  Vector E1 = right * textureX;
+  Vector E2 = right * thirdX + up * textureY;
+  Vector S1 = ray.vector.cross(E2);
+  Vector S2 = S.cross(E1);
+
+  double S1E1 = S1.dot(E1);
+  // Parallel
+  if (S1E1 == 0)
+	  return false;
+  double t = S2.dot(E2) / S1E1;
+  if (t <= 0 || t >= 1)
+	  return false;
+  double b1 = S1.dot(S) / S1E1;
+  double b2 = S2.dot(ray.vector) / S1E1;
+
+  if (!(b1 >= 0 && b2 >= 0 && (1 - b1 - b2) >= 0))
+    return false;
+  if (texture->opacity > 1 - 1E-6)
+    return true;
+  unsigned char temp[4];
+  double amb, op, ref;
+  texture->getColor(temp, &amb, &op, &ref, fix(b1 + b2 * thirdX / textureX - .5),
+                    fix(b2 - .5));
+  if (op > 1 - 1E-6)
+    return true;
+  fill[0] *= temp[0] / 255.;
+  fill[1] *= temp[1] / 255.;
+  fill[2] *= temp[2] / 255.;
+  return false;
 }
 
 AABB Triangle::buildAABB() {
