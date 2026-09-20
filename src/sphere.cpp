@@ -111,3 +111,8 @@ void Sphere::setRoll(double c){
    zcos = cos(roll);
    zsin = sin(roll);
 }
+
+AABB Sphere::buildAABB() {
+  return {{center.x - radius, center.y - radius, center.z - radius},
+          {center.x + radius, center.y + radius, center.z + radius}};
+}
