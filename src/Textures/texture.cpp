@@ -1,5 +1,4 @@
 #include "texture.h"
-#include <cmath>
 
 double interpolate(double a,double b,double x)
 {
@@ -10,7 +9,9 @@ double interpolate(double a,double b,double x)
 Texture::Texture(double am, double op, double ref):ambient(am),opacity(op), reflection(ref){}
 
 double fix(double a){
-  return a - floor(a);
+   a = a - (long long)a;
+   if(a<0) a+=1.;
+   return a;
 }
 
 double ground(double e){
