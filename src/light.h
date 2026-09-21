@@ -66,6 +66,7 @@ public:
    void addLight(Light* s);
    void buildBVHTree();
    void intersect(const Ray ray, Shape *&shape, double &time);
+   bool intersectLight(const Ray lightRay, double *lightColor);
    ~Autonoma();
 };
 
