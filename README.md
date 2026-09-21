@@ -44,6 +44,17 @@ To test the speedup of a specific optimization, we first test the commit where t
 
 The commit hash can be found using `git log`.
 
+Here are all commit hashes for all of our optmizations coresponding to the section number in our report:
+
+* 1.1: c3df38f601ccaf80a2c213a178dc03fc0956db74  
+* 1.2: 59ecb419f2f825fccbae5e40567587455c18eab9  
+* 1.3: fcdd400e9bb0ec31ad7fbb98ad63adaf0da1d724  
+* 1.4: b0e13ea766172d16a857c8bbb7f2baf127433df3  
+* 1.5: d91d4d5f9bcfeea5d3b7202861386a75835afcee  
+* 1.6: 7074a532b834dc3ebf951870ab1c281af4221055  
+* 2.1: c1f9b80dd3d118ea1b022f99c29f9599f281daa8  
+* 2.2: 81cbca51e663a6c9395d2ba4506744e52bc92866  
+
 The testing procedure is:
 
 ```bash
