@@ -247,7 +247,7 @@ class BVHTree {
         stack.push_back(cur->left);
       if(aabbLightIntersect(root[cur->right].aabb, ray))
         stack.push_back(cur->right);
-  }
+    }
   return false;
   }
 
@@ -296,9 +296,8 @@ public:
   }
 
   bool intersectLight(const Ray lightRay, double *lightColor) {
-    if(root.size())
-      if(intersectLightImpl(root, lightRay, lightColor))
-        return true;
+    if(root.size() && intersectLightImpl(root, lightRay, lightColor))
+      return true;
     // Unbounded shapes are not in the tree, so they must be tested linearly.
     for (Shape *cshape : unbounded) {
       bool hit = cshape->getLightIntersection(lightRay, lightColor);
